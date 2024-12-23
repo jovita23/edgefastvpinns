@@ -1,0 +1,87 @@
+# This YAML file contains configuration parameters for a variational physics-informed neural network (VarPINN) experimentation.
+
+experimentation:
+        output_path: "output/compression_test_50k/Poisson2D/td_16x64x400_0.7"  # Path to the output directory where the results will be saved.compression_test_100k
+
+decomposition_type: "tucker"    
+geometry:
+  mesh_generation_method: "external"  # Method for generating the mesh. Can be "internal" or "external".
+  generate_mesh_plot: True  # Flag indicating whether to generate a plot of the mesh.
+  
+  # internal mesh generated quadrilateral mesh, depending on the parameters specified below.
+
+  internal_mesh_params:  # Parameters for internal mesh generation method.
+    x_min: 0  # Minimum x-coordinate of the domain.
+    x_max: 1  # Maximum x-coordinate of the domain.
+    y_min: 0  # Minimum y-coordinate of the domain.
+    y_max: 1  # Maximum y-coordinate of the domain.
+    n_cells_x: 4 # Number of cells in the x-direction. # Can change this
+    n_cells_y: 4 # Number of cells in the y-direction. # Can change this
+    n_boundary_points: 400  # Number of boundary points.
+    n_test_points_x: 100    # Number of test points in the x-direction.
+    n_test_points_y: 100    # Number of test points in the y-direction.
+  
+  num_blocks : 20
+
+  exact_solution:
+    exact_solution_generation: "external" # whether the exact solution needs to be read from external file.
+    exact_solution_file_name: "fem_output_gear_forward_sin.csv" # External solution file name.
+  
+
+  mesh_type: "quadrilateral"  # Type of mesh. Can be "quadrilateral" or other supported types.
+  
+  external_mesh_params:  # Parameters for external mesh generation method.
+    mesh_file_name: "meshes/gear.mesh"  # Path to the external mesh file (should be a .mesh file).
+    boundary_refinement_level: 2  # Level of refinement for the boundary.
+    boundary_sampling_method: "lhs"  # Method for sampling the boundary. Can be "uniform" or "lhs".
+
+
+
+fe:
+  fe_order: 4 # Order of the finite element basis functions.5,10,15 or 20 #Can change this
+  fe_type: "jacobi"  # Type of finite element basis functions. Can be "jacobi" or other supported types.
+  quad_order: 5 # Order of the quadrature rule. #Can change this
+  quad_type: "gauss-legendre"  # Type of quadrature rule. Can be "gauss-jacobi" or other supported types.
+  svd_rank : 9 #max_value can be min(ntest,n_quad)
+  rank_list : [10,16,25]
+
+pde:
+  beta: 10  # Parameter for the PDE. Loss_total = Loss_PDE + beta*Loss_boundary
+
+model:
+  model_architecture: [2, 50,50,50, 1]  # Architecture of the neural network model. # can change this
+  activation: "tanh"  # Activation function used in the neural network.
+  use_attention: False  # Flag indicating whether to use attention mechanism in the model.
+  epochs: 50000 # Number of training epochs. # Can change this
+  dtype: "float32"  # Data type used for computations. # Can change this. 
+  set_memory_growth: False  # Flag indicating whether to set memory growth for GPU.
+  
+  learning_rate: # Parameters for learning rate scheduling.
+    initial_learning_rate: 0.001  # Initial learning rate. # Can change this.
+    use_lr_scheduler: False  # Flag indicating whether to use learning rate scheduler.
+    decay_steps: 1000  # Number of steps between each learning rate decay.
+    decay_rate: 0.99  # Decay rate for the learning rate.
+    staircase: False  # Flag indicating whether to use staircase decay.
+
+
+is_matplotlib_available: True     
+  
+
+logging:
+  update_progress_bar: 1000 # Number of steps between each update of the progress bar.
+  update_console_output: 1000  # Number of steps between each update of the console output.
+  update_solution_images: 1000  # Number of steps between each update of the intermediate solution images.
+  plot_residual_images: True
+  print_verbose: True  # Flag indicating whether to print verbose output.
+  test_errors_last_n_epochs: 1000
+
+
+wandb:
+  use_wandb: False
+  project_name: "Decomposition_Experiment_Tucker_50k_Poisson 2D"
+  wandb_run_prefix: "10_20x20_4_64"
+  entity: "starslab-iisc"
+
+additional:
+  run_by: "Jovita"  # Name of the person running the experiment.
+  System: "21"  # System identifier. 
